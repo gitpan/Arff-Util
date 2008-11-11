@@ -21,12 +21,9 @@ Version 0.01
 
 our $VERSION = '0.01';
 
-
 =head1 SYNOPSIS
 
 Quick summary of what the module does.
-
-Perhaps a little code snippet.
 
   use ARFF::Util;
   
@@ -35,6 +32,12 @@ Perhaps a little code snippet.
   
   # save given buffer into the .arff formatted file
   save_arff($arff_hash, $file_address);
+
+=head1 DESCRIPTION
+
+ARFF::Util provides a collection of methods for processing ARFF formatted files.
+"An ARFF (Attribute-Relation File Format) file is an ASCII text file that describes a list of instances sharing a set of attributes."
+for more information about ARFF format visit http://weka.sourceforge.net/wekadoc/index.php/en:ARFF_%283.5.1%29
 
 =head1 EXPORT
 
