@@ -13,6 +13,10 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Test::More' => 0,
+        'Data::Dumper' => 2.121_14,
+        'Moose' => 0.92,
+        'String::Util' => 0.11,
+        'Devel::Size' => 0.71,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Arff-Util-*' },

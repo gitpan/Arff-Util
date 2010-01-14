@@ -1,46 +1,102 @@
 package Arff::Util;
 
-use warnings;
-use strict;
-
-use Carp qw(cluck);
+use Moose;
 
 use Data::Dumper;
-use Devel::Size qw(size total_size);
 use String::Util ':all';
 
 =head1 NAME
 
 Arff::Util - ARFF files processing utilities.
+This is a moose-based class.
 
 =head1 VERSION
 
-Version 0.01
+Version 1.1
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '1.1';
+
+
 
 =head1 SYNOPSIS
 
 Quick summary of what the module does.
 
   use ARFF::Util;
-  
+
+  my $arff_object = ARFF::Util->new();
   # load .arff formatted file into the buffer, and return pointer to buffer
-  $arff_hash = load_arff($file_address);
+  $arff_hash = $arff_object->load_arff($file_address);
   
   # save given buffer into the .arff formatted file
-  save_arff($arff_hash, $file_address);
+  $arff_object->save_arff($arff_hash, $file_address);
 
 =head1 DESCRIPTION
 
 ARFF::Util provides a collection of methods for processing ARFF formatted files.
 "An ARFF (Attribute-Relation File Format) file is an ASCII text file that describes a list of instances sharing a set of attributes."
-for more information about ARFF format visit http://weka.sourceforge.net/wekadoc/index.php/en:ARFF_%283.5.1%29
+for more information about ARFF format visit http://www.cs.waikato.ac.nz/~ml/weka/arff.html
 
 =head1 EXPORT
 
+
+
+=head1 Object Attributes
+
+=head2 relation
+ 
+ This is a buffer hash
+ Structure of hash:
+
+ relation -> {
+		attributes => [
+				{
+					attribute_name => x1,
+					attribute_type => x2,
+				},...
+			      ]
+		records    => [
+				{
+					attribute_name1 => value1,
+					attribute_name2 => value2,...
+				},...
+			      ]
+		data_record_count => x
+	      }
+=cut
+
+has relation => (
+	is => 'rw',
+	isa => 'HashRef',
+	default => sub{{
+		attributes => [],
+		records => [],
+		data_record_count => 0
+	}}
+);
+
+=head2 error_count
+
+Number of errors occured during the parsing or saving
+
+=cut
+
+has error_count => (
+	is => 'rw'
+);
+
+=head2 debug_mode
+
+Set it to one to see detail info
+
+=cut
+
+has debug_mode => (
+	is => 'rw',
+	default => 0
+);
 
 
 =head1 FUNCTIONS
@@ -51,16 +107,19 @@ Get arff file path and load it in buffer
 
 =cut
 
-sub load_from_file {
-	my ($arff_file) = @_;
-	local *FILE;
-	open(FILE, $arff_file);
+sub load_arff {
+	my ($self, $arff_file) = @_;
 	my $status = q/normal/;
- 	log_msg("Loading $arff_file ...");
+	if($self->debug_mode){
+ 		print "Loading $arff_file ...\n";
+	}
 	my $record_count = 0;
 	my $attribute_count = 0;
 	my $line_counter = 1;
+	my $relation = $self->relation;
 
+	local *FILE;
+	open(FILE, $arff_file)  or die $!;;
 	while (my $current_line = <FILE>)
 	{
 		$current_line = trim($current_line);
@@ -71,12 +130,12 @@ sub load_from_file {
 		}
 		elsif ($current_line =~ /^\s*\@RELATION\s+(\S*)/i )
 		{
-			$relation -> {"relation_name"} = $1;
+			$relation->{relation_name} = $1;
 		}
 		elsif ($current_line =~ /^\s*\@ATTRIBUTE\s+(\S*)\s+(\S*)/i )
 		{
-			if(!$relation -> {"attributes"}){
-				$relation -> {"attributes"} = [];
+			if(!$relation->{attributes}){
+				$relation->{attributes} = [];
 			}
 			my $attribute = { "attribute_name" => $1, "attribute_type" => $2};
 			my $attributes = $relation -> {"attributes"};
@@ -89,7 +148,7 @@ sub load_from_file {
 		{
 			$status = q/data/;
 		}
-		elsif($status == q/data/ && $current_line != q//){
+		elsif($status eq q/data/ && $current_line ne q//){
 			if(!$relation -> {"records"}){
 				$relation -> {"records"} = [];
 			}
@@ -108,12 +167,14 @@ sub load_from_file {
 					$cur_record->{$$attributes[$i]->{"attribute_name"}} = trim($data_parts[$i]);
 				}
 				#log_msg("parts: ".$#data_parts);
-	
 				$record_count ++;
 				push  @$records , $cur_record;
 			}else
 			{
-				throw_error("Line $line_counter : Invalid data record: $current_line Containts ".(scalar @data_parts)." Expected $attribute_count");
+				if($self->debug_mode){
+					print "Line $line_counter : Invalid data record: $current_line Containts ".(scalar @data_parts)." Expected $attribute_count\n";
+				}
+				$self->error_count($self->error_count+1);
 			}
 			
 		}
@@ -122,23 +183,84 @@ sub load_from_file {
 	
 	$relation -> {"data_record_count"} = $record_count;
  	$relation -> {"attribute_count"} = $attribute_count;
- 	#log_msg(Dumper $relation);
-	log_msg("$arff_file loaded with $error_count error(s).");
-	log_msg("Buffer size: ".get_buffer_size()."bytes");
-	return 1;
+
+	if($self->debug_mode){
+		eval("use Devel::Size qw(size total_size)");
+
+		print "$arff_file loaded with ".$self->error_count." error(s).\n";
+		print "Buffer size: ".total_size($relation)." bytes\n";
+	}
+	$self->relation($relation);
+	return $relation;
 }
 
 =head2 save_arff
 
-Save given buffer into the .arff formatted file. This method is not implemented yet.
+Save given buffer into the .arff formatted file. 
 
 =cut
 
 sub save_arff {
-	my ($buffer,$file_name) = @_;
+	my ($self, $buffer, $arff_file) = @_;
 	
-	throw_error("Not implemented yet!");
+	local *FILE;
 	
+	open(FILE, ">$arff_file");
+	
+	my $record_count = 0;
+ 	
+	if($self->debug_mode){
+		print "Writing buffer to $arff_file ...\n";
+	}
+	
+	if($buffer->{relation_name})
+	{
+		print FILE q/@RELATION / . $buffer->{relation_name} . "\n";
+	}
+	print FILE "\n";
+	print FILE "\n";
+
+	if($buffer->{attributes}){
+		foreach my $attribute (@{$buffer -> {"attributes"}}){
+			print FILE q/@ATTRIBUTE / . $attribute->{attribute_name} . q/ / . $attribute->{attribute_type} . "\n";
+		}
+		print FILE "\n";
+		print FILE "\n";
+	
+		if($buffer->{records}){
+			print FILE "\@DATA\n";
+			print FILE "\n";
+
+			foreach my $record (@{$buffer -> {"records"}}){
+				my $record_string = q//;
+				foreach my $attribute (@{$buffer -> {"attributes"}}){
+					if($record->{$attribute->{attribute_name}}){
+						$record_string .= $record->{$attribute->{attribute_name}} . q/,/;
+					}else{
+						if($self->debug_mode){
+							print "Invali buffer passed, ".$attribute->{attribute_name}." is not defined for record... write UNKNOWN\n";
+						}
+						$record_string .= q/UNKNOWN,/;
+						$self->error_count($self->error_count+1);
+					}
+				}
+
+				$record_string =~ s/,$//;
+
+				print FILE $record_string . "\n";
+				$record_count ++;
+			}
+		}
+	}
+
+	if($self->debug_mode){
+		eval("use Devel::Size qw(size total_size)");
+		
+		print "Buffer saved to $arff_file with ".$self->error_count." error(s).\n";
+		print "Buffer size: ".total_size($buffer)." bytes\n";
+		print "Data rows count: ".$record_count."\n";
+	}
+
 	return 1;
 }
 
@@ -156,6 +278,10 @@ automatically be notified of progress on your bug as I make changes.
 
 
 =head1 SUPPORT
+
+You can contact me: eemadzadeh [at] gmail  
+
+or
 
 You can find documentation for this module with the perldoc command.
 
