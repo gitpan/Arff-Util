@@ -4,6 +4,7 @@ use Moose;
 
 use Data::Dumper;
 use String::Util ':all';
+use Text::CSV;
 
 =head1 NAME
 
@@ -12,11 +13,11 @@ This is a moose-based class.
 
 =head1 VERSION
 
-Version 1.1
+Version 1.2
 
 =cut
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 
 
@@ -84,7 +85,8 @@ Number of errors occured during the parsing or saving
 =cut
 
 has error_count => (
-	is => 'rw'
+	is => 'rw',
+        default => 0
 );
 
 =head2 debug_mode
@@ -117,9 +119,11 @@ sub load_arff {
 	my $attribute_count = 0;
 	my $line_counter = 1;
 	my $relation = $self->relation;
-
+        my $line_parser = Text::CSV->new({binary => 1, quote_char => '\'', escape_char => '\\'}) or die "Cannot use CSV Parser: ".Text::CSV->error_diag ();
+    
 	local *FILE;
 	open(FILE, $arff_file)  or die $!;;
+
 	while (my $current_line = <FILE>)
 	{
 		$current_line = trim($current_line);
@@ -153,7 +157,8 @@ sub load_arff {
 				$relation -> {"records"} = [];
 			}
 			#log_msg("extracting data $current_line");
-			my @data_parts = split(/,/, $current_line);
+                        $line_parser->parse($current_line);                        
+			my @data_parts = $line_parser->fields(); # split(/,/, $current_line);
 
 			my $attributes = $relation -> {"attributes"};
  			my $records = $relation -> {"records"};
@@ -172,7 +177,7 @@ sub load_arff {
 			}else
 			{
 				if($self->debug_mode){
-					print "Line $line_counter : Invalid data record: $current_line Containts ".(scalar @data_parts)." Expected $attribute_count\n";
+					print "Line $line_counter : Invalid data record: $current_line Contains ".(scalar @data_parts)." Expected $attribute_count\n";
 				}
 				$self->error_count($self->error_count+1);
 			}
@@ -188,7 +193,6 @@ sub load_arff {
 		eval("use Devel::Size qw(size total_size)");
 
 		print "$arff_file loaded with ".$self->error_count." error(s).\n";
-		print "Buffer size: ".total_size($relation)." bytes\n";
 	}
 	$self->relation($relation);
 	return $relation;
@@ -257,16 +261,19 @@ sub save_arff {
 		eval("use Devel::Size qw(size total_size)");
 		
 		print "Buffer saved to $arff_file with ".$self->error_count." error(s).\n";
-		print "Buffer size: ".total_size($buffer)." bytes\n";
 		print "Data rows count: ".$record_count."\n";
 	}
 
 	return 1;
 }
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Ehsan Emadzadeh, C<< <ehsan0emadzadeh at yahoo.com> >>
+
+Contributing developer: 
+
+ - Ondrej Dusek
 
 =head1 BUGS
 

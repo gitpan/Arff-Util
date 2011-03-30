@@ -3,3 +3,8 @@ Revision history for Arff-Util
 0.01    Date/time
         First version, released on an unsuspecting world.
 
+1.2	Following bugs fixed:
+
+* It is necessary to state explicitly that error_count is 0 on startup, otherwise the package crashes with "use strict" enabled
+* Arff files with nominal values that contain quoted commas are not read correctly -- a simple "split /,/" is not sufficient, but using Text::CSV solves the problem
+
