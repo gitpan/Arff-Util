@@ -8,3 +8,7 @@ Revision history for Arff-Util
 * It is necessary to state explicitly that error_count is 0 on startup, otherwise the package crashes with "use strict" enabled
 * Arff files with nominal values that contain quoted commas are not read correctly -- a simple "split /,/" is not sufficient, but using Text::CSV solves the problem
 
+1.21	
+
+* added "allow_loose_escapes => 1" parameter to Text::CSV object
+* META.yml fixed

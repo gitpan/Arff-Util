@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Arff-Util
-version:            1.1
+version:            1.21
 abstract:           ARFF files processing utilities.
 author:
     - Ehsan Emadzadeh <ehsan0emadzadeh@yahoo.com>
@@ -16,7 +16,7 @@ requires:
     Moose:         0.92
     String::Util:  0.11
     Test::More:    0
-    Text::CSV      0.01
+    Text::CSV:      0.01
 no_index:
     directory:
         - t
