@@ -17,6 +17,7 @@ WriteMakefile(
         'Moose' => 0.92,
         'String::Util' => 0.11,
         'Devel::Size' => 0.71,
+	'Text::CSV' => 0.01,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Arff-Util-*' },

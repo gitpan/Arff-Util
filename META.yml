@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Arff-Util
-version:            1.22
+version:            1.23
 abstract:           ARFF files processing utilities.
 author:
     - Ehsan Emadzadeh <ehsan0emadzadeh@yahoo.com>
