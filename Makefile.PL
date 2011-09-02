@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     NAME                => 'Arff::Util',
-    AUTHOR              => 'Ehsan Emadzadeh <ehsan0emadzadeh@yahoo.com>',
+    AUTHOR              => 'Ehsan Emadzadeh <eemadzadeh@gmail.com>',
     VERSION_FROM        => 'lib/Arff/Util.pm',
     ABSTRACT_FROM       => 'lib/Arff/Util.pm',
     ($ExtUtils::MakeMaker::VERSION >= 6.3002

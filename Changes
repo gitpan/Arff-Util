@@ -3,12 +3,16 @@ Revision history for Arff-Util
 0.01    Date/time
         First version, released on an unsuspecting world.
 
-1.2	Following bugs fixed:
+1.2	
 
-* It is necessary to state explicitly that error_count is 0 on startup, otherwise the package crashes with "use strict" enabled
-* Arff files with nominal values that contain quoted commas are not read correctly -- a simple "split /,/" is not sufficient, but using Text::CSV solves the problem
+* Explicitly set the error_count = 0 on startup, fixed crashes with "use strict" enabled
+* Fixed nominal values that contain quoted commas, Used Text::CSV
 
 1.23	
 
-* added "allow_loose_escapes => 1" parameter to Text::CSV object
-* META.yml fixed
+* Added "allow_loose_escapes => 1" parameter to Text::CSV object 
+* Dependencies in META.yml fixed
+
+1.24
+
+* Fixed "UNKNOWN" bug for 0 values

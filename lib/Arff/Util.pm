@@ -13,25 +13,25 @@ This is a moose-based class.
 
 =head1 VERSION
 
-Version 1.2
+Version 1.24
 
 =cut
 
-our $VERSION = '1.2';
+our $VERSION = '1.24';
 
 
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+A quick summary of what this module does.
 
   use ARFF::Util;
 
   my $arff_object = ARFF::Util->new();
-  # load .arff formatted file into the buffer, and return pointer to buffer
+  # load .arff formatted file into the buffer, and return a pointer to the buffer
   $arff_hash = $arff_object->load_arff($file_address);
   
-  # save given buffer into the .arff formatted file
+  # save a given buffer into the .arff formatted file
   $arff_object->save_arff($arff_hash, $file_address);
 
 =head1 DESCRIPTION
@@ -48,8 +48,7 @@ for more information about ARFF format visit http://www.cs.waikato.ac.nz/~ml/wek
 
 =head2 relation
  
- This is a buffer hash
- Structure of hash:
+ This is a buffer hash,  Structure of hash:
 
  relation -> {
 		attributes => [
@@ -80,7 +79,7 @@ has relation => (
 
 =head2 error_count
 
-Number of errors occured during the parsing or saving
+The number of errors occured during parsing or saving
 
 =cut
 
@@ -105,7 +104,7 @@ has debug_mode => (
 
 =head2 load_arff
 
-Get arff file path and load it in buffer
+Gets an ARFF file path and load it in the buffer
 
 =cut
 
@@ -200,7 +199,7 @@ sub load_arff {
 
 =head2 save_arff
 
-Save given buffer into the .arff formatted file. 
+Saves given buffer into an ARFF formatted file. 
 
 =cut
 
@@ -238,11 +237,11 @@ sub save_arff {
 			foreach my $record (@{$buffer -> {"records"}}){
 				my $record_string = q//;
 				foreach my $attribute (@{$buffer -> {"attributes"}}){
-					if($record->{$attribute->{attribute_name}}){
+					if(defined($record->{$attribute->{attribute_name}})){
 						$record_string .= $record->{$attribute->{attribute_name}} . q/,/;
 					}else{
 						if($self->debug_mode){
-							print "Invali buffer passed, ".$attribute->{attribute_name}." is not defined for record... write UNKNOWN\n";
+							print "Invalid buffer passed, ".$attribute->{attribute_name}." is not defined for record... write UNKNOWN\n";
 						}
 						$record_string .= q/UNKNOWN,/;
 						$self->error_count($self->error_count+1);

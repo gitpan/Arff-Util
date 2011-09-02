@@ -1,9 +1,9 @@
 --- #YAML:1.0
 name:               Arff-Util
-version:            1.23
+version:            1.24
 abstract:           ARFF files processing utilities.
 author:
-    - Ehsan Emadzadeh <ehsan0emadzadeh@yahoo.com>
+    - Ehsan Emadzadeh <eemadzadeh@gmail.com>
 license:            perl
 distribution_type:  module
 configure_requires:
@@ -16,12 +16,12 @@ requires:
     Moose:         0.92
     String::Util:  0.11
     Test::More:    0
-    Text::CSV:      0.01
+    Text::CSV:     0.01
 no_index:
     directory:
         - t
         - inc
-generated_by:       ExtUtils::MakeMaker version 6.50
+generated_by:       ExtUtils::MakeMaker version 6.55_02
 meta-spec:
     url:      http://module-build.sourceforge.net/META-spec-v1.4.html
     version:  1.4
